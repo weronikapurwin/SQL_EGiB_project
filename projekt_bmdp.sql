@@ -515,49 +515,6 @@ CREATE INDEX EGB_JednostkaRejestrowaLokali_idx3 ON EGB_JednostkaRejestrowaLokali
 
 CREATE INDEX EGB_ObrebEwidencyjny_idx3 ON EGB_ObrebEwidencyjny (idjednostkaewidenycjna);
 
---trigger
-
-CREATE OR REPLACE FUNCTION fun_pow()
-	RETURNS trigger AS
-$BODY$
-	BEGIN
-    IF NEW.geometria IS NULL THEN
-        RAISE EXCEPTION 'trzeba wprowadzić dane';
-        END IF;
-		--wstawianie danych
-		NEW.delta := ST_Area(NEW.geometria) - ST_Area(OLD.geometria) ;
-    	NEW.czaszmiany := current_timestamp;
-    	RETURN NEW;
-	END;
-$BODY$
-	LANGUAGE plpgsql VOLATILE
-	COST 100;
-	
-CREATE TRIGGER trg_pow
-AFTER UPDATE
-ON egb_konturklasyfikacyjny
-FOR EACH ROW
-EXECUTE PROCEDURE fun_pow();
-
-
---function
-create or replace function fun(id_dzialki text, id_konturklas text) returns text as 
-$$
-declare 
-
-begin
-DROP TABLE IF EXISTS dzialki_klasa;
-CREATE TABLE dzialki_klasa (
-	id serial primary key,
-	geom geometry(multipolygon, 2180),
-	klasa text,
-	powierzchnia double precision
-);
-
-end;
-$$
-language plpgsql;
-
 
 
 
